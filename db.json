@@ -10,9 +10,9 @@
     {
       "id": "2",
       "title": "두 번째 노트",
-      "content": "할 일 목록을 정리해봅시다.",
+      "content": "할 일 목록을 정리해봅시다. (수정 확인)",
       "createdAt": "2024-01-02T00:00:00.000Z",
-      "updatedAt": "2024-01-02T00:00:00.000Z"
+      "updatedAt": "2026-11-06T08:51:25.164Z"
     },
     {
       "id": "3",
@@ -27,6 +27,13 @@
       "createdAt": "2026-03-23T13:57:30.308Z",
       "updatedAt": "2026-03-23T13:57:30.308Z",
       "id": "dP_NPYuHV94"
+    },
+    {
+      "title": "검증용 새 노트",
+      "content": "2장 실습 검증에서 추가함",
+      "createdAt": "2026-11-06T08:51:24.215Z",
+      "updatedAt": "2026-11-06T08:51:24.215Z",
+      "id": "CYPu-Dn9Nn8"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
