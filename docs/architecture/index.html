@@ -188,8 +188,10 @@ flowchart LR
   sel -- "props" --> NoteList
   sel -- "props" --> NoteEditor
   cre -- "props" --> NoteEditor
-  NoteList -- "onSelect / 새 노트" --> sel
-  NoteEditor -- "onDone" --> cre
+  NoteList -- "onSelect: sel 설정, cre=false" --> sel
+  Layout -- "onNewNote: sel=null, cre=true" --> sel
+  Layout -- "onNewNote" --> cre
+  NoteEditor -- "onDone (저장/취소): cre=false" --> cre
 
   notes -- "useNotes" --> NoteList
   notes -- "useNotes: 선택 노트 조회" --> NoteEditor
@@ -198,8 +200,8 @@ flowchart LR
   NoteEditor -- "createNote / updateNote" --> notes
   NoteList -- "deleteNote" --> notes
 
-  notes -. "선택 노트 값 → 폼 동기화 (useEffect)" .-> title
-  notes -. "선택 노트 값 → 폼 동기화 (useEffect)" .-> content
+  notes -. "useEffect: selectedNoteId·isCreating 변경 시에만 폼 채움" .-> title
+  notes -. "useEffect: selectedNoteId·isCreating 변경 시에만 폼 채움" .-> content
         </pre>
       </section>
 
@@ -232,6 +234,7 @@ sequenceDiagram
   Editor->>App: onDone()
   App->>App: setIsCreating(false)
   Note over Editor,Ctx: 실패 시 throw → Editor가 console.error
+  Note over Editor,App: 신규 생성 후엔 selectedNoteId가 null이라 빈 상태 화면으로 돌아감
         </pre>
       </section>
 
@@ -255,6 +258,35 @@ sequenceDiagram
   Ctx->>Ctx: setNotes(prev → filter)
   Ctx-->>List: 리렌더
   Note over List,Ctx: 실패 시 List가 console.error
+        </pre>
+      </section>
+
+      <section>
+        <h2>6. 초기 로딩 시퀀스</h2>
+        <p>
+          <code>NotesProvider</code>가 마운트될 때 한 번 목록을 불러옵니다. 조회 실패는 throw되지
+          않고 <code>error</code> 상태로 흡수되어 <code>NoteList</code>에 표시됩니다.
+        </p>
+        <pre class="mermaid">
+sequenceDiagram
+  participant Ctx as NotesProvider
+  participant API as api/notes.ts
+  participant DB as json-server
+  participant List as NoteList
+
+  Ctx->>Ctx: 마운트, useEffect (loading=true)
+  Ctx->>API: fetchNotes()
+  API->>DB: GET /notes
+  alt 성공
+    DB-->>API: Note[]
+    API-->>Ctx: Note[]
+    Ctx->>Ctx: setNotes
+  else 실패
+    API-->>Ctx: throw Error
+    Ctx->>Ctx: setError(e.message)
+  end
+  Ctx->>Ctx: finally setLoading(false)
+  Ctx-->>List: 로딩 → 오류 / 빈 상태 / 목록 렌더
         </pre>
       </section>
     </main>
