@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNotes } from '../context/NotesContext';
-import { useTags } from '../hooks/useTags';
-import { TagInput } from './TagInput';
+import { useNotes } from './NotesContext';
+import { useTags } from '../tags/useTags';
+import { TagInput } from '../tags/TagInput';
 
 interface NoteEditorProps {
   selectedNoteId: string | null;

@@ -7,7 +7,7 @@ const mockUpdateNote = vi.fn();
 const mockCreateNote = vi.fn();
 let mockNotes: Note[] = [];
 
-vi.mock('../context/NotesContext', () => ({
+vi.mock('./NotesContext', () => ({
   useNotes: () => ({
     notes: mockNotes,
     loading: false,

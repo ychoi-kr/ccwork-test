@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { NotesProvider } from './context/NotesContext';
-import { Layout } from './components/Layout';
-import { NoteList } from './components/NoteList';
-import { NoteEditor } from './components/NoteEditor';
+import { NotesProvider } from './notes/NotesContext';
+import { Layout } from './layout/Layout';
+import { Sidebar } from './layout/Sidebar';
+import { NoteEditor } from './notes/NoteEditor';
 
 function App() {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
@@ -27,13 +27,9 @@ function App() {
     <NotesProvider>
       <Layout
         onNewNote={handleNewNote}
-        sidebar={<NoteList selectedNoteId={selectedNoteId} onSelect={handleSelectNote} />}
+        sidebar={<Sidebar selectedNoteId={selectedNoteId} onSelect={handleSelectNote} />}
         main={
-          <NoteEditor
-            selectedNoteId={selectedNoteId}
-            isCreating={isCreating}
-            onDone={handleDone}
-          />
+          <NoteEditor selectedNoteId={selectedNoteId} isCreating={isCreating} onDone={handleDone} />
         }
       />
     </NotesProvider>

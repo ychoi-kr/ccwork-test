@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NoteEditor } from './NoteEditor';
-import { NotesProvider } from '../context/NotesContext';
+import { NotesProvider } from './NotesContext';
 
 const note = {
   id: '1',

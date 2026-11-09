@@ -1,96 +1,96 @@
 [
   {
-    "file": "src/components/Layout.tsx",
+    "file": "src/layout/Layout.tsx",
     "rule": "no-inline-style",
     "line": "<div className=\"flex\" style={{ height: 'calc(100vh - 65px)' }}>",
     "count": 1
   },
   {
-    "file": "src/components/Layout.tsx",
+    "file": "src/layout/Layout.tsx",
     "rule": "no-inline-style",
     "line": "style={{ fontFamily: 'Boogaloo, sans-serif' }}",
     "count": 1
   },
   {
-    "file": "src/components/Layout.tsx",
+    "file": "src/layout/Layout.tsx",
     "rule": "no-line",
     "line": "<div className=\"w-72 border-r border-border overflow-y-auto bg-muted/50 p-3 space-y-2 shrink-0\">",
     "count": 1
   },
   {
-    "file": "src/components/Layout.tsx",
+    "file": "src/layout/Layout.tsx",
     "rule": "no-line",
     "line": "<header className=\"bg-card border-b border-border px-6 py-4 flex items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.06)]\">",
     "count": 1
   },
   {
-    "file": "src/components/Layout.tsx",
+    "file": "src/layout/Layout.tsx",
     "rule": "no-pure-black",
     "line": "<header className=\"bg-card border-b border-border px-6 py-4 flex items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.06)]\">",
     "count": 1
   },
   {
-    "file": "src/components/Layout.tsx",
+    "file": "src/layout/Layout.tsx",
     "rule": "no-shadow",
     "line": "<header className=\"bg-card border-b border-border px-6 py-4 flex items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.06)]\">",
     "count": 1
   },
   {
-    "file": "src/components/NoteEditor.tsx",
+    "file": "src/notes/NoteEditor.tsx",
     "rule": "no-line",
     "line": "<div className=\"bg-card rounded-3xl px-8 sm:px-12 py-8 shadow-[0_2px_12px_rgba(0,0,0,0.07)] border border-border max-w-2xl\">",
     "count": 1
   },
   {
-    "file": "src/components/NoteEditor.tsx",
+    "file": "src/notes/NoteEditor.tsx",
     "rule": "no-line",
     "line": "<div className=\"flex gap-3 mt-6 pt-4 border-t border-border\">",
     "count": 1
   },
   {
-    "file": "src/components/NoteEditor.tsx",
+    "file": "src/notes/NoteEditor.tsx",
     "rule": "no-line",
     "line": "<div className=\"h-px bg-border mb-4\" />",
     "count": 1
   },
   {
-    "file": "src/components/NoteEditor.tsx",
+    "file": "src/notes/NoteEditor.tsx",
     "rule": "no-pure-black",
     "line": "<div className=\"bg-card rounded-3xl px-8 sm:px-12 py-8 shadow-[0_2px_12px_rgba(0,0,0,0.07)] border border-border max-w-2xl\">",
     "count": 1
   },
   {
-    "file": "src/components/NoteEditor.tsx",
+    "file": "src/notes/NoteEditor.tsx",
     "rule": "no-shadow",
     "line": "<div className=\"bg-card rounded-3xl px-8 sm:px-12 py-8 shadow-[0_2px_12px_rgba(0,0,0,0.07)] border border-border max-w-2xl\">",
     "count": 1
   },
   {
-    "file": "src/components/NoteItem.tsx",
+    "file": "src/notes/NoteItem.tsx",
     "rule": "no-line",
     "line": "className={`bg-card rounded-2xl p-4 border cursor-pointer transition-all ${",
     "count": 1
   },
   {
-    "file": "src/components/NoteItem.tsx",
+    "file": "src/notes/NoteItem.tsx",
     "rule": "no-pure-black",
     "line": ": 'border-border hover:shadow-[0_2px_8px_rgba(0,0,0,0.07)]'",
     "count": 1
   },
   {
-    "file": "src/components/NoteItem.tsx",
+    "file": "src/notes/NoteItem.tsx",
     "rule": "no-pure-black",
     "line": "? 'border-foreground shadow-[0_2px_12px_rgba(0,0,0,0.12)]'",
     "count": 1
   },
   {
-    "file": "src/components/NoteItem.tsx",
+    "file": "src/notes/NoteItem.tsx",
     "rule": "no-shadow",
     "line": ": 'border-border hover:shadow-[0_2px_8px_rgba(0,0,0,0.07)]'",
     "count": 1
   },
   {
-    "file": "src/components/NoteItem.tsx",
+    "file": "src/notes/NoteItem.tsx",
     "rule": "no-shadow",
     "line": "? 'border-foreground shadow-[0_2px_12px_rgba(0,0,0,0.12)]'",
     "count": 1
