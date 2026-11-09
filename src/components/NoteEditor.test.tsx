@@ -350,4 +350,71 @@ describe('NoteEditor', () => {
       consoleError.mockRestore();
     });
   });
+  describe('생성 모드 handleSave', () => {
+    const renderCreating = () => {
+      const onDone = vi.fn();
+      const utils = render(<NoteEditor selectedNoteId={null} isCreating={true} onDone={onDone} />);
+      return { onDone, ...utils };
+    };
+
+    beforeEach(() => {
+      mockCreateNote.mockResolvedValue(undefined);
+    });
+
+    // 이슈 11 시나리오 9
+    it('should createNote(title, content, tags)를 호출한다 when 생성 모드에서 태그를 추가하고 저장을 누를 때', async () => {
+      const { container } = renderCreating();
+
+      await userEvent.type(screen.getByPlaceholderText('제목'), '새 제목');
+      await userEvent.type(screen.getByPlaceholderText('내용을 입력하세요...'), '새 내용');
+      await userEvent.type(getTagInput(container), 'React{Enter}');
+      await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+      expect(mockCreateNote).toHaveBeenCalledWith('새 제목', '새 내용', ['React']);
+    });
+
+    // 이슈 11 시나리오 10
+    it('should 태그 추가 순서대로 tags를 전달한다 when 태그를 여러 개 추가하고 저장할 때', async () => {
+      const { container } = renderCreating();
+
+      await userEvent.type(screen.getByPlaceholderText('제목'), '새 제목');
+      await userEvent.type(getTagInput(container), 'React{Enter}');
+      await userEvent.type(getTagInput(container), 'Vue{Enter}');
+      await userEvent.type(getTagInput(container), 'Node{Enter}');
+      await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+      expect(mockCreateNote).toHaveBeenCalledWith('새 제목', '', ['React', 'Vue', 'Node']);
+    });
+
+    // 이슈 11 시나리오 11
+    it('should createNote(title, content, [])를 호출한다 when 태그 없이 저장할 때', async () => {
+      renderCreating();
+
+      await userEvent.type(screen.getByPlaceholderText('제목'), '새 제목');
+      await userEvent.type(screen.getByPlaceholderText('내용을 입력하세요...'), '새 내용');
+      await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+      expect(mockCreateNote).toHaveBeenCalledWith('새 제목', '새 내용', []);
+    });
+
+    // 이슈 11 시나리오 12
+    it('should console.error만 남기고 제목·내용·태그 입력을 유지한다 when createNote가 실패할 때', async () => {
+      const error = new Error('Failed to create note');
+      mockCreateNote.mockRejectedValue(error);
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const { container, onDone } = renderCreating();
+
+      await userEvent.type(screen.getByPlaceholderText('제목'), '새 제목');
+      await userEvent.type(screen.getByPlaceholderText('내용을 입력하세요...'), '새 내용');
+      await userEvent.type(getTagInput(container), 'React{Enter}');
+      await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+      expect(consoleError).toHaveBeenCalledWith('Failed to save note:', error);
+      expect(onDone).not.toHaveBeenCalled();
+      expect(screen.getByPlaceholderText('제목')).toHaveValue('새 제목');
+      expect(screen.getByPlaceholderText('내용을 입력하세요...')).toHaveValue('새 내용');
+      expect(screen.getByText('React')).toBeInTheDocument();
+      consoleError.mockRestore();
+    });
+  });
 });
