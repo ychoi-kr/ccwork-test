@@ -41,6 +41,7 @@ components (UI)  →  context/NotesContext (전역 상태)  →  api/notes (fetc
 ## 구현 패턴 / 컨벤션
 
 ### 컴포넌트
+
 - 함수형 컴포넌트 + named export(`export function X`). `App`만 default export. 파일 하나에 컴포넌트 하나, 파일명은 PascalCase.
 - props는 같은 파일 상단에 `interface XxxProps`로 정의하고 시그니처에서 구조 분해한다. `React.FC`는 쓰지 않는다.
 - `children` 대신 이름 있는 슬롯 props(`Layout`의 `sidebar`, `main`: `ReactNode`)로 영역을 주입한다.
@@ -50,12 +51,14 @@ components (UI)  →  context/NotesContext (전역 상태)  →  api/notes (fetc
 - 이벤트 핸들러 안에서 클릭 전파를 막아야 하면 `e.stopPropagation()`을 쓴다(`NoteItem` 삭제 버튼).
 
 ### 상태 관리
+
 - 서버 데이터(`notes`, `loading`, `error`)는 `NotesContext` 하나에서 `useState`로 관리한다. 외부 상태 라이브러리와 `useReducer`는 쓰지 않는다.
 - 변경 후에는 **서버 응답으로 로컬 상태를 갱신**한다. 불변 업데이트(`[...prev, x]`, `prev.map`, `prev.filter`)를 함수형 `setState`로 처리한다.
 - 순수 UI 상태(`selectedNoteId`, `isCreating`)는 `App`의 `useState`에 두고 props로 내려보낸다. 폼 입력(`title`, `content`, `saving`)은 `NoteEditor`의 로컬 상태다.
 - Context 값 객체는 메모이제이션하지 않는다(`useMemo`/`useCallback` 없음).
 
 ### API 호출
+
 - `src/api/notes.ts`에 리소스별로 async 함수를 모은다. 모두 `fetch` + `if (!res.ok) throw new Error('Failed to ...')` + `res.json()` 형태다.
 - 쓰기 요청은 `Content-Type: application/json` 헤더와 `JSON.stringify` 본문을 쓴다. 생성은 `POST`, 수정은 `PATCH`(부분 수정), 삭제는 `DELETE`(반환값 없음, `Promise<void>`).
 - `createdAt`/`updatedAt`은 API 함수 안에서 채운다. 호출자는 `title`/`content`만 넘긴다.
@@ -63,12 +66,14 @@ components (UI)  →  context/NotesContext (전역 상태)  →  api/notes (fetc
 - API 모듈은 `import * as api from '../api/notes'` 형태로 `NotesContext.tsx`에서만 import한다.
 
 ### 네이밍
+
 - 컴포넌트/컴포넌트 파일: PascalCase (`NoteEditor.tsx`). 비컴포넌트 파일: camelCase 또는 소문자 (`notes.ts`, `note.ts`).
 - API와 Context는 동작 이름을 `create/update/delete` + `Note`로 통일한다(`fetchNotes`만 조회용). 새 동작도 두 레이어에서 같은 이름을 쓴다.
 - props 콜백은 `on` + 동작(`onSelect`, `onNewNote`, `onDone`), 그 구현은 `handle` + 동작(`handleSelectNote`, `handleSave`).
 - 불리언은 `is`/`-ing` 형태(`isSelected`, `isCreating`, `loading`, `saving`). 타입은 `interface`를 쓰고 `I` 접두사는 없다.
 
 ### 스타일 / 도구
+
 - **Tailwind CSS v4**(`@tailwindcss/vite`, `tailwind.config` 없음). 디자인 토큰은 `src/index.css`의 `@theme`에 정의되어 있고 `bg-card`, `text-muted-foreground`, `border-border`, `text-destructive` 같은 시맨틱 클래스로 쓴다.
 - 폰트는 `index.html`에서 Pretendard(CDN)와 Boogaloo(Google Fonts)를 로드한다.
 - UI 텍스트와 코드 주석은 한국어. Prettier: 세미콜론, 작은따옴표, 2칸, trailing comma `all`, `printWidth` 100. TypeScript `strict: true`.
@@ -86,7 +91,18 @@ components (UI)  →  context/NotesContext (전역 상태)  →  api/notes (fetc
 8. **react-refresh 규칙**: `NotesContext.tsx`가 컴포넌트(`NotesProvider`)와 훅(`useNotes`)을 함께 export하므로 `react-refresh/only-export-components` 경고 대상이다.
 9. **파일명 단/복수**: `api/notes.ts`는 복수, `types/note.ts`는 단수다.
 
+## 커밋 규칙
+
+husky가 커밋 시 hook을 자동 실행한다. 위반하면 커밋이 중단되므로 아래 규칙을 미리 지킨다.
+
+- **pre-commit**: `lint-staged`가 스테이징된 파일만 검사한다. `*.{ts,tsx}`는 `eslint --fix` + `prettier --write`, `*.{json,css,md,html}`은 `prettier --write`. ESLint **error**가 있으면 커밋이 막힌다(warn은 통과).
+- **commit-msg**: `commitlint`(`commitlint.config.js`)가 메시지를 검사한다.
+  - 형식은 `type: 제목`. type은 `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `style`, `perf`, `build`, `ci`, `revert`(`init`은 허용 목록에 없음).
+  - 제목은 필수, 한국어 가능.
+  - 제목 다음에 빈 줄을 두고 **본문을 비어 있지 않은 줄 2줄 이상** 작성한다. 꼬리말(`Co-Authored-By:` 등)은 본문 줄 수에 포함되지 않는다.
+- 설정 위치: `.husky/`, `package.json`의 `lint-staged`, `commitlint.config.js`, `.prettierignore`(`db.json`, `dist` 제외). `--no-verify`로 우회하지 않는다.
+
 ## 참고
 
 - 삭제 확인 절차가 없고, 목록은 서버가 준 순서(생성 순) 그대로 표시된다. 라우팅 라이브러리는 없다.
-- 원격 저장소: `git@github.com:frongt/ccwork.git`. 커밋 메시지는 `docs:`, `init:` 같은 conventional-commit 스타일 접두사를 쓴다.
+- 원격 저장소: `git@github.com:frongt/ccwork.git`. 커밋 메시지 규칙은 위 "커밋 규칙" 섹션을 따른다.
