@@ -74,6 +74,12 @@ components (UI)  →  context/NotesContext (전역 상태)  →  api/notes (fetc
 
 ### 스타일 / 도구
 
+- **디자인 시스템**: 화면 모양을 바꾸는 모든 작업(컴포넌트 생성·수정, className, 색, 여백, 폰트, 그림자 등)은 **`design-system` 스킬**(`.claude/skills/design-system/`)로 진행한다. 상세 문서는 `docs/design-system/README.md` 인덱스에서 필요한 것만 읽는다. 기존 토큰과 충돌하면 디자인 시스템이 우선이며, 마이그레이션 전까지는 기존 토큰을 병행한다. 요청 없이 기존 컴포넌트를 일괄 변환하지는 않는다.
+- **자동 검사**: `src/`의 `.ts/.tsx/.css`를 Edit/Write하면 PostToolUse 훅(`.claude/settings.json`)이 `check_styles.py`를 실행한다. baseline에 없는 신규 위반이 있으면 피드백이 오며, 같은 턴에 고친다. 기존 위반은 `baseline.json`에 기록되어 있고, 신규 위반을 숨기려고 baseline을 갱신하지 않는다.
+- 디자인 시스템 핵심 원칙과 Do / Don't (상시 로딩):
+
+@docs/design-system/principles.md
+
 - **Tailwind CSS v4**(`@tailwindcss/vite`, `tailwind.config` 없음). 디자인 토큰은 `src/index.css`의 `@theme`에 정의되어 있고 `bg-card`, `text-muted-foreground`, `border-border`, `text-destructive` 같은 시맨틱 클래스로 쓴다.
 - 폰트는 `index.html`에서 Pretendard(CDN)와 Boogaloo(Google Fonts)를 로드한다.
 - UI 텍스트와 코드 주석은 한국어. Prettier: 세미콜론, 작은따옴표, 2칸, trailing comma `all`, `printWidth` 100. TypeScript `strict: true`.
