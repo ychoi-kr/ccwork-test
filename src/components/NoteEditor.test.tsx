@@ -173,6 +173,51 @@ describe('NoteEditor', () => {
       expect(screen.getByPlaceholderText('제목')).toHaveValue('제목');
       consoleError.mockRestore();
     });
+
+    // 시나리오 36
+    it("should 기존 태그 뒤에 새 태그를 붙여 tags: ['React', 'Vue']로 호출한다 when tags: ['React']인 노트에서 Vue를 추가하고 저장한다", async () => {
+      const { container } = renderEditor();
+
+      await userEvent.type(getTagInput(container), 'Vue{Enter}');
+      await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+      expect(mockUpdateNote).toHaveBeenCalledWith('1', {
+        title: '제목',
+        content: '내용',
+        tags: ['React', 'Vue'],
+      });
+    });
+
+    // 시나리오 37
+    it('should 저장 버튼을 다시 활성화한다 when updateNote가 throw한다', async () => {
+      mockUpdateNote.mockRejectedValue(new Error('Failed to update note'));
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      renderEditor();
+
+      await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+      expect(screen.getByRole('button', { name: '저장' })).toBeEnabled();
+      consoleError.mockRestore();
+    });
+
+    // 시나리오 38
+    it('should 같은 tags로 updateNote를 다시 호출한다 when 저장 실패 후 저장을 다시 누른다', async () => {
+      mockUpdateNote.mockRejectedValue(new Error('Failed to update note'));
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const { container } = renderEditor();
+      await userEvent.type(getTagInput(container), 'Vue{Enter}');
+
+      await userEvent.click(screen.getByRole('button', { name: '저장' }));
+      await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+      expect(mockUpdateNote).toHaveBeenCalledTimes(2);
+      expect(mockUpdateNote).toHaveBeenNthCalledWith(
+        2,
+        '1',
+        expect.objectContaining({ tags: ['React', 'Vue'] }),
+      );
+      consoleError.mockRestore();
+    });
   });
 
   // 시나리오 27

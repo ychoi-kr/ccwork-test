@@ -117,6 +117,11 @@ interface TagInputProps {
 32. [경계] NoteEditor – should 태그를 비운다 when 생성 모드로 전환한다
 33. [예외] api.updateNote – should `Error('Failed to update note')`를 throw한다 when 응답이 `!res.ok`이다
 34. [정상] api.updateNote – should PATCH 본문에 `title`, `content`, `tags`를 포함한다 when `tags`를 넘겨 호출한다
+35. [경계] TagInput – should 입력값을 15자로 제한한다 when 20자를 입력한다
+36. [정상] NoteEditor.handleSave – should 기존 태그 뒤에 새 태그를 붙여 `tags: ['React', 'Vue']`로 호출한다 when `tags: ['React']`인 노트에서 `Vue`를 추가하고 저장한다
+37. [예외] NoteEditor.handleSave – should 저장 버튼을 다시 활성화한다 when `updateNote`가 throw한다
+38. [예외] NoteEditor.handleSave – should 같은 `tags`로 `updateNote`를 다시 호출한다 when 저장 실패 후 저장을 다시 누른다
+39. [정상] NoteEditor + NotesProvider – should PATCH 본문에 `tags`를 포함해 요청한다 when 실제 Context를 거쳐 태그를 추가하고 저장한다
 
 ## AC 커버리지
 
@@ -125,14 +130,14 @@ interface TagInputProps {
 | 편집 화면에 태그 입력창과 칩 목록이 보인다                                            | 13, 14, 22                                                                    |
 | Enter로 태그가 추가되고 입력창이 비워지며, 추가한 순서대로 표시된다                   | 3, 9, 15, 17                                                                  |
 | 앞뒤 공백은 제거되어 칩에 표시·저장된다                                               | 4, 12, 24                                                                     |
-| 이미 태그가 있는 노트에 태그를 추가해도 기존 태그가 유지되고 새 태그가 맨 뒤에 붙는다 | 2, 21                                                                         |
-| 입력창은 15자를 넘겨 입력할 수 없다                                                   | 16                                                                            |
+| 이미 태그가 있는 노트에 태그를 추가해도 기존 태그가 유지되고 새 태그가 맨 뒤에 붙는다 | 2, 21, 36                                                                     |
+| 입력창은 15자를 넘겨 입력할 수 없다                                                   | 16, 35                                                                        |
 | Enter가 폼 submit이나 저장을 일으키지 않는다                                          | 10, 11, 18, 27                                                                |
-| 저장 시 PATCH 본문에 `title`, `content`, `tags`가 포함된다                            | 23, 34                                                                        |
+| 저장 시 PATCH 본문에 `title`, `content`, `tags`가 포함된다                            | 23, 34, 39                                                                    |
 | 저장 시 입력창에 남은 미확정 텍스트는 태그로 저장되지 않는다                          | 25                                                                            |
 | `tags` 필드가 없는 기존 노트를 열어도 오류 없이 빈 태그로 표시된다                    | 20, 26                                                                        |
-| 저장 실패 시 `console.error`만 남기고 폼 상태(태그 포함)는 유지된다                   | 29, 30, 33                                                                    |
+| 저장 실패 시 `console.error`만 남기고 폼 상태(태그 포함)는 유지된다                   | 29, 30, 33, 37, 38                                                            |
 | `npm run build`(타입 체크), `npm run lint`, `npm test`가 통과한다                     | 자동 검사 (빌드·린트·테스트 실행 결과이며 개별 시나리오로 검증할 대상이 아님) |
 | 스타일 검사 훅(`check_styles.py`)에서 신규 위반이 없다                                | 자동 검사 (PostToolUse 훅이 검증)                                             |
 
-모든 AC가 최소 1개 시나리오 또는 "자동 검사"로 덮였음을 확인했다. 참고: 15자 초과 입력 차단은 브라우저 동작이라 시나리오 16은 `maxLength` 속성 존재로 검증한다. 시나리오 5·31·32는 동기화 `useEffect`(`resetTags`) 변경을 검증한다.
+모든 AC가 최소 1개 시나리오 또는 "자동 검사"로 덮였음을 확인했다. 참고: 15자 초과 입력 차단은 시나리오 16이 `maxLength` 속성 존재로, 시나리오 35가 실제 입력 잘림으로 검증한다. 시나리오 35~39는 `ac-verifier` 검증에서 나온 갭을 보강한 것이다. 시나리오 5·31·32는 동기화 `useEffect`(`resetTags`) 변경을 검증한다.

@@ -68,4 +68,14 @@ describe('TagInput', () => {
     expect(notPrevented).toBe(false);
     expect(onSubmit).not.toHaveBeenCalled();
   });
+
+  // 시나리오 35
+  it('should 입력값을 15자로 제한한다 when 20자를 입력한다', async () => {
+    renderInput([]);
+    const input = screen.getByRole('textbox');
+
+    await userEvent.type(input, 'a'.repeat(20));
+
+    expect(input).toHaveValue('a'.repeat(15));
+  });
 });
