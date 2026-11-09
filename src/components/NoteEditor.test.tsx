@@ -248,4 +248,106 @@ describe('NoteEditor', () => {
 
     expect(screen.queryByText('React')).not.toBeInTheDocument();
   });
+
+  describe('태그 삭제', () => {
+    beforeEach(() => {
+      mockNotes = [makeNote({ tags: ['React', 'Vue', 'Node'] })];
+    });
+
+    const clickRemove = (name: string) =>
+      userEvent.click(screen.getByRole('button', { name: `${name} 태그 삭제` }));
+
+    // TAG-3 시나리오 17
+    it('should 해당 태그 칩만 사라지고 남은 태그 순서가 유지된다 when 태그 3개가 있는 노트에서 가운데 태그의 X를 클릭한다', async () => {
+      renderEditor();
+
+      await clickRemove('Vue');
+
+      expect(screen.queryByText('Vue')).not.toBeInTheDocument();
+      const chips = screen.getAllByText(/^(React|Node)$/);
+      expect(chips.map((c) => c.textContent)).toEqual(['React', 'Node']);
+    });
+
+    // TAG-3 시나리오 18
+    it('should 삭제된 태그가 빠진 tags로 updateNote(id, { title, content, tags })를 호출한다 when 태그를 삭제한 뒤 저장한다', async () => {
+      renderEditor();
+
+      await clickRemove('Vue');
+      await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+      expect(mockUpdateNote).toHaveBeenCalledWith('1', {
+        title: '제목',
+        content: '내용',
+        tags: ['React', 'Node'],
+      });
+    });
+
+    // TAG-3 시나리오 19
+    it('should 키보드(Tab, Enter)로 태그를 삭제할 수 있다 when X 버튼에 포커스를 옮겨 Enter를 누른다', async () => {
+      renderEditor();
+      const removeButton = screen.getByRole('button', { name: 'React 태그 삭제' });
+
+      // 제목 입력창에서 Tab으로 첫 번째 X 버튼까지 이동한다
+      screen.getByPlaceholderText('제목').focus();
+      await userEvent.tab();
+      expect(removeButton).toHaveFocus();
+      await userEvent.keyboard('{Enter}');
+
+      expect(screen.queryByText('React')).not.toBeInTheDocument();
+    });
+
+    // TAG-3 시나리오 20
+    it('should updateNote와 서버 요청을 호출하지 않는다 when 태그를 삭제하고 아직 저장하지 않았다', async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal('fetch', fetchMock);
+      renderEditor();
+
+      await clickRemove('Vue');
+
+      expect(mockUpdateNote).not.toHaveBeenCalled();
+      expect(fetchMock).not.toHaveBeenCalled();
+      vi.unstubAllGlobals();
+    });
+
+    // TAG-3 시나리오 21
+    it('should tags가 빈 배열인 채로 updateNote를 호출한다 when 모든 태그를 삭제한 뒤 저장한다', async () => {
+      renderEditor();
+
+      await clickRemove('React');
+      await clickRemove('Vue');
+      await clickRemove('Node');
+      await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+      expect(mockUpdateNote).toHaveBeenCalledWith('1', expect.objectContaining({ tags: [] }));
+    });
+
+    // TAG-3 시나리오 22
+    it('should 저장되지 않고 폼 상태만 변한다 when X 버튼을 클릭한다', async () => {
+      const { onDone } = renderEditor();
+
+      await clickRemove('Vue');
+
+      expect(onDone).not.toHaveBeenCalled();
+      expect(mockUpdateNote).not.toHaveBeenCalled();
+      expect(screen.getByPlaceholderText('제목')).toHaveValue('제목');
+      expect(screen.getByPlaceholderText('내용을 입력하세요...')).toHaveValue('내용');
+    });
+
+    // TAG-3 시나리오 23
+    it('should console.error만 남기고 삭제된 폼 상태를 유지한다 when 태그 삭제 후 저장했는데 updateNote가 실패한다', async () => {
+      const error = new Error('Failed to update note');
+      mockUpdateNote.mockRejectedValue(error);
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      renderEditor();
+
+      await clickRemove('Vue');
+      await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+      expect(consoleError).toHaveBeenCalledWith('Failed to save note:', error);
+      expect(screen.queryByText('Vue')).not.toBeInTheDocument();
+      expect(screen.getByText('React')).toBeInTheDocument();
+      expect(screen.getByText('Node')).toBeInTheDocument();
+      consoleError.mockRestore();
+    });
+  });
 });

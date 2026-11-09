@@ -65,4 +65,61 @@ describe('useTags', () => {
       expect(result.current.tags).toEqual([]);
     });
   });
+
+  describe('removeTag', () => {
+    // TAG-3 시나리오 1
+    it('should 지정한 태그만 제거하고 나머지 순서를 유지한다 when tags가 ["React","Vue","Node"]이고 "Vue"를 전달한다', () => {
+      const { result } = renderHook(() => useTags(['React', 'Vue', 'Node']));
+
+      act(() => result.current.removeTag('Vue'));
+
+      expect(result.current.tags).toEqual(['React', 'Node']);
+    });
+
+    // TAG-3 시나리오 2
+    it('should tags를 빈 배열로 만든다 when 마지막 남은 태그를 제거한다', () => {
+      const { result } = renderHook(() => useTags(['React']));
+
+      act(() => result.current.removeTag('React'));
+
+      expect(result.current.tags).toEqual([]);
+    });
+
+    // TAG-3 시나리오 3
+    it('should 값이 같은 항목을 모두 제거한다 when tags에 같은 값이 둘 이상 있다', () => {
+      const { result } = renderHook(() => useTags(['React', 'Vue', 'React']));
+
+      act(() => result.current.removeTag('React'));
+
+      expect(result.current.tags).toEqual(['Vue']);
+    });
+
+    // TAG-3 시나리오 4
+    it('should 대소문자가 다른 태그는 제거하지 않는다 when "react"를 전달했는데 tags에는 "React"만 있다', () => {
+      const { result } = renderHook(() => useTags(['React']));
+
+      act(() => result.current.removeTag('react'));
+
+      expect(result.current.tags).toEqual(['React']);
+    });
+
+    // TAG-3 시나리오 5
+    it('should 아무 변화도 오류도 없다 when tags에 없는 값을 전달한다', () => {
+      const { result } = renderHook(() => useTags(['React', 'Vue']));
+
+      expect(() => act(() => result.current.removeTag('Node'))).not.toThrow();
+
+      expect(result.current.tags).toEqual(['React', 'Vue']);
+    });
+
+    // TAG-3 시나리오 6
+    it('should 이후 addTag로 추가한 태그가 정상 반영된다 when 삭제 후 새 태그를 추가한다', () => {
+      const { result } = renderHook(() => useTags(['React', 'Vue']));
+
+      act(() => result.current.removeTag('React'));
+      act(() => result.current.addTag('Node'));
+
+      expect(result.current.tags).toEqual(['Vue', 'Node']);
+    });
+  });
 });
