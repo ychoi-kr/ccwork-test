@@ -6,6 +6,8 @@ interface TagInputProps {
   onRemove: (tag: string) => void;
 }
 
+const MAX_TAG_LENGTH = 15;
+
 // onRemove는 TAG-3(삭제)에서 사용한다
 export function TagInput({ tags, onAdd }: TagInputProps) {
   const { text, onChange, onKeyDown } = useTagInput(onAdd);
@@ -22,7 +24,7 @@ export function TagInput({ tags, onAdd }: TagInputProps) {
         value={text}
         onChange={onChange}
         onKeyDown={onKeyDown}
-        maxLength={15}
+        maxLength={MAX_TAG_LENGTH}
         className="bg-transparent border-none outline-none text-sm text-foreground"
       />
     </div>
