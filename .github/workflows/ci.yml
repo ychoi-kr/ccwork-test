@@ -30,8 +30,10 @@ jobs:
       - name: 타입 체크
         run: npx tsc --noEmit
 
+      # typescript-eslint 하위 minimatch(moderate, DoS)는 상위 패키지가 고정해 npm으로 해결할 수 없다.
+      # 상위 패키지가 갱신될 때까지 high 이상만 막는다. moderate로 되돌릴 수 있는지 주기적으로 확인한다.
       - name: 보안 점검
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=high
 
       - name: 단위 테스트
         run: npm test
