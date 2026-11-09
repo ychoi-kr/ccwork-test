@@ -8,15 +8,25 @@ interface TagInputProps {
 
 const MAX_TAG_LENGTH = 15;
 
-// onRemove는 TAG-3(삭제)에서 사용한다
-export function TagInput({ tags, onAdd }: TagInputProps) {
+export function TagInput({ tags, onAdd, onRemove }: TagInputProps) {
   const { text, onChange, onKeyDown } = useTagInput(onAdd);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       {tags.map((tag) => (
-        <span key={tag} className="bg-muted text-muted-foreground rounded-full px-3 py-1 text-xs">
-          {tag}
+        <span
+          key={tag}
+          className="group bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs"
+        >
+          <span>{tag}</span>
+          <button
+            type="button"
+            aria-label={`${tag} 태그 삭제`}
+            onClick={() => onRemove(tag)}
+            className="cursor-pointer opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+          >
+            ×
+          </button>
         </span>
       ))}
       <input

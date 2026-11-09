@@ -13,7 +13,7 @@ export function NoteEditor({ selectedNoteId, isCreating, onDone }: NoteEditorPro
   const { notes, createNote, updateNote } = useNotes();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const { tags, addTag, resetTags } = useTags([]);
+  const { tags, addTag, removeTag, resetTags } = useTags([]);
   const [saving, setSaving] = useState(false);
 
   const selectedNote = notes.find((n) => n.id === selectedNoteId);
@@ -78,7 +78,7 @@ export function NoteEditor({ selectedNoteId, isCreating, onDone }: NoteEditorPro
       />
 
       {/* 태그 입력 */}
-      <TagInput tags={tags} onAdd={addTag} onRemove={() => {}} />
+      <TagInput tags={tags} onAdd={addTag} onRemove={removeTag} />
 
       {/* 구분선 */}
       <div className="h-px bg-border mb-4" />

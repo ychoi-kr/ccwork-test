@@ -78,4 +78,103 @@ describe('TagInput', () => {
 
     expect(input).toHaveValue('a'.repeat(15));
   });
+
+  describe('태그 삭제', () => {
+    const renderWithRemove = (tags: string[], onRemove = vi.fn(), onAdd = vi.fn()) =>
+      render(<TagInput tags={tags} onAdd={onAdd} onRemove={onRemove} />);
+
+    // TAG-3 시나리오 7
+    it('should 태그마다 X 버튼을 렌더링한다 when tags가 여러 개다', () => {
+      renderWithRemove(['React', 'Vue', 'Node']);
+
+      expect(screen.getAllByRole('button')).toHaveLength(3);
+    });
+
+    // TAG-3 시나리오 8
+    it("should X 버튼의 접근 가능한 이름이 '{태그} 태그 삭제'이다 when tags에 'React'가 있다", () => {
+      renderWithRemove(['React']);
+
+      expect(screen.getByRole('button', { name: 'React 태그 삭제' })).toBeInTheDocument();
+    });
+
+    // TAG-3 시나리오 9
+    it('should onRemove를 해당 태그 값으로 한 번 호출한다 when "Vue" 칩의 X 버튼을 클릭한다', async () => {
+      const onRemove = vi.fn();
+      renderWithRemove(['React', 'Vue'], onRemove);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Vue 태그 삭제' }));
+
+      expect(onRemove).toHaveBeenCalledTimes(1);
+      expect(onRemove).toHaveBeenCalledWith('Vue');
+    });
+
+    // TAG-3 시나리오 10
+    it('should onRemove를 호출한다 when X 버튼에 포커스를 두고 Enter를 누른다', async () => {
+      const onRemove = vi.fn();
+      renderWithRemove(['React'], onRemove);
+
+      screen.getByRole('button', { name: 'React 태그 삭제' }).focus();
+      await userEvent.keyboard('{Enter}');
+
+      expect(onRemove).toHaveBeenCalledWith('React');
+    });
+
+    // TAG-3 시나리오 11
+    it('should onRemove를 호출한다 when X 버튼에 포커스를 두고 Space를 누른다', async () => {
+      const onRemove = vi.fn();
+      renderWithRemove(['React'], onRemove);
+
+      screen.getByRole('button', { name: 'React 태그 삭제' }).focus();
+      await userEvent.keyboard(' ');
+
+      expect(onRemove).toHaveBeenCalledWith('React');
+    });
+
+    // TAG-3 시나리오 12
+    it('should Tab 이동으로 X 버튼에 포커스가 닿는다 when 키보드로 칩 영역을 탐색한다', async () => {
+      renderWithRemove(['React']);
+
+      await userEvent.tab();
+
+      expect(screen.getByRole('button', { name: 'React 태그 삭제' })).toHaveFocus();
+    });
+
+    // TAG-3 시나리오 13
+    it('should X 버튼을 렌더링하지 않는다 when tags가 빈 배열이다', () => {
+      renderWithRemove([]);
+
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    });
+
+    // TAG-3 시나리오 14
+    it("should 한글·공백 포함 태그도 '{태그} 태그 삭제' 이름의 버튼을 제공한다 when 태그가 '리액트 훅'이다", () => {
+      renderWithRemove(['리액트 훅']);
+
+      expect(screen.getByRole('button', { name: '리액트 훅 태그 삭제' })).toBeInTheDocument();
+    });
+
+    // TAG-3 시나리오 15
+    it('should 폼 submit이 발생하지 않는다 when 폼 안에서 X 버튼을 클릭한다', async () => {
+      const onSubmit = vi.fn((e: React.FormEvent) => e.preventDefault());
+      render(
+        <form onSubmit={onSubmit}>
+          <TagInput tags={['React']} onAdd={vi.fn()} onRemove={vi.fn()} />
+        </form>,
+      );
+
+      await userEvent.click(screen.getByRole('button', { name: 'React 태그 삭제' }));
+
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    // TAG-3 시나리오 16
+    it('should onAdd를 호출하지 않는다 when X 버튼을 클릭한다', async () => {
+      const onAdd = vi.fn();
+      renderWithRemove(['React'], vi.fn(), onAdd);
+
+      await userEvent.click(screen.getByRole('button', { name: 'React 태그 삭제' }));
+
+      expect(onAdd).not.toHaveBeenCalled();
+    });
+  });
 });
