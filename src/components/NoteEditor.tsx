@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNotes } from '../context/NotesContext';
+import { useTags } from '../hooks/useTags';
+import { TagInput } from './TagInput';
 
 interface NoteEditorProps {
   selectedNoteId: string | null;
@@ -11,6 +13,7 @@ export function NoteEditor({ selectedNoteId, isCreating, onDone }: NoteEditorPro
   const { notes, createNote, updateNote } = useNotes();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const { tags, addTag, resetTags } = useTags([]);
   const [saving, setSaving] = useState(false);
 
   const selectedNote = notes.find((n) => n.id === selectedNoteId);
@@ -20,9 +23,11 @@ export function NoteEditor({ selectedNoteId, isCreating, onDone }: NoteEditorPro
     if (selectedNote) {
       setTitle(selectedNote.title);
       setContent(selectedNote.content);
+      resetTags(selectedNote.tags ?? []);
     } else if (isCreating) {
       setTitle('');
       setContent('');
+      resetTags([]);
     }
   }, [selectedNoteId, isCreating]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -34,7 +39,7 @@ export function NoteEditor({ selectedNoteId, isCreating, onDone }: NoteEditorPro
       if (isCreating) {
         await createNote(title, content);
       } else if (selectedNoteId) {
-        await updateNote(selectedNoteId, { title, content });
+        await updateNote(selectedNoteId, { title, content, tags });
       }
       onDone();
     } catch (e) {
@@ -50,9 +55,7 @@ export function NoteEditor({ selectedNoteId, isCreating, onDone }: NoteEditorPro
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-3">
           <p className="text-5xl">📝</p>
-          <p className="text-muted-foreground text-sm">
-            노트를 선택하거나 새 노트를 만드세요
-          </p>
+          <p className="text-muted-foreground text-sm">노트를 선택하거나 새 노트를 만드세요</p>
         </div>
       </div>
     );
@@ -73,6 +76,9 @@ export function NoteEditor({ selectedNoteId, isCreating, onDone }: NoteEditorPro
         placeholder="제목"
         className="w-full text-xl font-bold text-foreground bg-transparent border-none outline-none placeholder:text-muted-foreground/50 mb-4"
       />
+
+      {/* 태그 입력 */}
+      <TagInput tags={tags} onAdd={addTag} onRemove={() => {}} />
 
       {/* 구분선 */}
       <div className="h-px bg-border mb-4" />
