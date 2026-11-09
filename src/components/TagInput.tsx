@@ -31,6 +31,7 @@ export function TagInput({ tags, onAdd, onRemove }: TagInputProps) {
       ))}
       <input
         type="text"
+        aria-label="태그 입력"
         value={text}
         onChange={onChange}
         onKeyDown={onKeyDown}
