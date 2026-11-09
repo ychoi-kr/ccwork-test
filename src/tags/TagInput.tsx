@@ -1,4 +1,4 @@
-import { useTagInput } from '../hooks/useTagInput';
+import { useTagInput } from './useTagInput';
 
 interface TagInputProps {
   tags: string[];

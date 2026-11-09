@@ -1,4 +1,4 @@
-import { useNotes } from '../context/NotesContext';
+import { useNotes } from './NotesContext';
 import { NoteItem } from './NoteItem';
 
 interface NoteListProps {
@@ -18,21 +18,15 @@ export function NoteList({ selectedNoteId, onSelect }: NoteListProps) {
   };
 
   if (loading) {
-    return (
-      <p className="text-sm text-muted-foreground text-center py-8">로딩 중...</p>
-    );
+    return <p className="text-sm text-muted-foreground text-center py-8">로딩 중...</p>;
   }
 
   if (error) {
-    return (
-      <p className="text-sm text-destructive text-center py-8">오류: {error}</p>
-    );
+    return <p className="text-sm text-destructive text-center py-8">오류: {error}</p>;
   }
 
   if (notes.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground text-center py-8">노트가 없습니다</p>
-    );
+    return <p className="text-sm text-muted-foreground text-center py-8">노트가 없습니다</p>;
   }
 
   return (
