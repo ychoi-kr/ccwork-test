@@ -27,7 +27,7 @@ E2E는 느리고 깨지기 쉬운 대신 단위 테스트가 구조적으로 못
 
 - `docs/features/{기능명}/prd.md`의 **사용자 스토리 표**(ID, 스토리, 인수 조건)와 **Out of Scope**.
 - 기존 테스트: `src/**/*.test.{ts,tsx}`의 `describe`/`it` 이름 목록(`grep -hE "^\s*(describe|it)\(" ...`). 이게 "이미 검증된 것"의 목록이다.
-- 화면 코드(`src/components/`)에서 버튼 텍스트, `aria-label`, placeholder, 제목 문구를 확인한다. 로케이터와 기대 문구는 추측하지 말고 코드에서 가져온다.
+- 화면 코드(`src/layout/`, `src/notes/`, `src/tags/`)에서 버튼 텍스트, `aria-label`, placeholder, 제목 문구를 확인한다. 로케이터와 기대 문구는 추측하지 말고 코드에서 가져온다.
 - `playwright.config.ts`(baseURL, `workers: 1`, webServer)와 `e2e/`의 기존 파일. 이미 있는 헬퍼·fixture는 재사용한다.
 - **이슈 진행 상태**: `docs/features/{기능명}/issues.md`의 이슈 ↔ 스토리 매핑과, 각 이슈가 구현·머지됐는지(`git log --oneline`, 브랜치/PR, `src/` 코드, 해당 이슈의 단위 테스트 유무)를 확인한다. PRD의 스토리가 전부 구현된 것은 아니다. 아직 구현 전인 이슈의 스토리를 모르고 E2E로 옮기면 "앱 버그"처럼 보이는 실패를 만든다.
 - PRD에 "E2E는 Out of Scope"라고 적혀 있어도 사용자가 이 스킬을 불렀다면 사용자 결정이 우선이다. 보고에 한 줄만 언급한다.

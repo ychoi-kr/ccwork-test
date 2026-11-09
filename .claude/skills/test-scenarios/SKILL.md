@@ -35,7 +35,7 @@ argument-hint: <이슈 번호> [승인 | 수정 요청 내용]
 1. 읽을 것:
    - `gh issue view N` — 설명, **완료 조건(Acceptance Criteria)**, 이슈에 이미 있는 시나리오(Given/When/Then)와 테스트 메모.
    - `docs/features/tag/prd.md` (필요하면 `spec-fixed.md`, `issues.md`의 해당 이슈 절) — 결정 사항·Out of Scope.
-   - 코드베이스: `src/api/notes.ts`, `src/context/NotesContext.tsx`, `src/types/note.ts`, 관련 `src/components/*`, 이미 있는 `src/hooks/*`. 기존 패턴을 그대로 따르려면 실제 코드를 봐야 한다.
+   - 코드베이스: `src/notes/notes.ts`, `src/notes/NotesContext.tsx`, `src/types/note.ts`, 관련 도메인 디렉터리(`src/notes/*`, `src/tags/*`, `src/layout/*`)의 컴포넌트와 이미 있는 훅(`src/tags/use*.ts`). 기존 패턴을 그대로 따르려면 실제 코드를 봐야 한다.
 2. 이슈가 건드리는 것만 시그니처로 확정한다. 이슈에 없는 기능을 미리 채워 넣지 않는다(이 프로젝트는 강의용이라 일부러 비워 둔 부분이 있다).
 3. 확정할 항목:
    - **함수/훅 시그니처**: 이름, 파라미터 타입, 반환 타입. 이름 규칙은 CLAUDE.md를 따른다(`create/update/delete` + `Note`, props 콜백은 `on` + 동작, 구현은 `handle` + 동작, 불리언은 `is`/`-ing`).

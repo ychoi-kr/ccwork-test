@@ -125,7 +125,7 @@ E2E는 앱을 실제로 쓰는 셈이라 `db.json`이 바뀔 수 있다. 실행 
 ① Trace Viewer로 실패 지점 확인
    npx playwright show-report
 ② 어느 레이어에서 깨졌는지 판별
-   - API: 요청/응답 불일치 (src/api/notes.ts, json-server 데이터)
+   - API: 요청/응답 불일치 (src/notes/notes.ts, json-server 데이터)
    - 렌더링: 화면에 보여야 할 것이 안 보임 (컴포넌트, 로케이터 대상 UI)
    - 로직: 상태 갱신·분기 오류 (NotesContext, App 상태, 폼 처리)
 ③ 해당 단위 테스트에 재현 케이스 추가 (Red)

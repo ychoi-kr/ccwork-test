@@ -31,18 +31,18 @@ argument-hint: <이슈 번호>
 - 파일이 없으면 중단하고 `/test-scenarios N`을 먼저 실행하라고 안내한다.
 - 맨 위 `상태:`가 `완료`가 아니면(승인 전이면) 중단하고 알린다. 승인되지 않은 시나리오로 테스트를 쓰면 나중에 다시 써야 한다.
 - 읽을 곳: `## 시그니처`(함수·훅·Props·에러 케이스·변경 전/후)와 `## 테스트 시나리오`(`[분류] 함수명 – should … when …` 목록).
-- 시나리오의 `함수명`과 시그니처로 **테스트 대상 파일**을 정한다(예: `useTags` → `src/hooks/useTags.ts`).
-- 기존 코드(`src/components/NoteEditor.tsx`, `src/context/NotesContext.tsx`, `src/api/notes.ts` 등)와 `package.json`을 훑어 mock 지점과 사용 가능한 라이브러리를 확인한다.
+- 시나리오의 `함수명`과 시그니처로 **테스트 대상 파일**을 정한다(예: `useTags` → `src/tags/useTags.ts`).
+- 기존 코드(`src/notes/NoteEditor.tsx`, `src/notes/NotesContext.tsx`, `src/notes/notes.ts` 등)와 `package.json`을 훑어 mock 지점과 사용 가능한 라이브러리를 확인한다.
 
 ### 2. 테스트 파일 배치
 
 대상 파일과 **같은 디렉토리**에 `{파일명}.test.ts` / `{파일명}.test.tsx`로 둔다.
 
-| 대상                          | 테스트 파일                        |
-| ----------------------------- | ---------------------------------- |
-| `src/api/tags.ts`             | `src/api/tags.test.ts`             |
-| `src/components/TagInput.tsx` | `src/components/TagInput.test.tsx` |
-| `src/hooks/useTags.ts`        | `src/hooks/useTags.test.ts`        |
+| 대상                    | 테스트 파일                  |
+| ----------------------- | ---------------------------- |
+| `src/notes/notes.ts`    | `src/notes/notes.test.ts`    |
+| `src/tags/TagInput.tsx` | `src/tags/TagInput.test.tsx` |
+| `src/tags/useTags.ts`   | `src/tags/useTags.test.ts`   |
 
 훅은 `renderHook`을 쓰더라도 JSX가 없으면 `.ts`, 있으면 `.tsx`. 이미 테스트 파일이 있으면 덮어쓰지 말고 읽은 뒤 없는 시나리오만 추가한다.
 
@@ -98,7 +98,7 @@ describe('useTags', () => {
 - Vitest + React Testing Library. `globals: true`라서 `describe/it/expect/vi`는 import하지 않는다. `render`, `screen`, `renderHook`, `act` 등은 `@testing-library/react`에서 import한다. `jest-dom` 매처는 setup에서 이미 로드된다.
 - 훅은 `renderHook`, 컴포넌트는 `render` + `screen`의 접근성 쿼리(`getByRole`, `getByPlaceholderText` 등)로 검증한다. 구현 세부(클래스명, 내부 상태)가 아니라 사용자에게 보이는 동작을 검증해야 구현이 바뀌어도 테스트가 깨지지 않는다.
 - API 함수는 `vi.stubGlobal('fetch', vi.fn())`로 `fetch`를 mock하고, 테스트 뒤에 `vi.unstubAllGlobals()`로 복원한다.
-- 컴포넌트가 `useNotes()`를 쓰면 `vi.mock('../context/NotesContext', ...)`로 Context를 mock한다(컴포넌트는 `api/`를 직접 import하지 않는 구조이므로 api가 아니라 Context 경계에서 끊는다). `console.error` 검증은 `vi.spyOn(console, 'error').mockImplementation(() => {})`.
+- 컴포넌트가 `useNotes()`를 쓰면 `vi.mock(...)`으로 `NotesContext`를 mock한다(같은 `src/notes/` 안이면 `'./NotesContext'`, 다른 도메인이면 `'../notes/NotesContext'`)(컴포넌트는 `api/`를 직접 import하지 않는 구조이므로 api가 아니라 Context 경계에서 끊는다). `console.error` 검증은 `vi.spyOn(console, 'error').mockImplementation(() => {})`.
 - 시나리오 사이에 상태가 새지 않게 `beforeEach`에서 mock을 초기화한다.
 
 ### 구현에 아직 없는 것을 import할 때
