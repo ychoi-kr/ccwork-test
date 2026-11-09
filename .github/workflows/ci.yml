@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 의존성 설치
+        run: npm ci
+
+      # npm run lint는 --fix가 붙어 있어 CI에서 파일을 수정해 버리므로 검사만 한다.
+      - name: Lint
+        run: npx eslint .
+
+      - name: 타입 체크
+        run: npx tsc --noEmit
+
+      # typescript-eslint 하위 minimatch(moderate, DoS)는 상위 패키지가 고정해 npm으로 해결할 수 없다.
+      # 상위 패키지가 갱신될 때까지 high 이상만 막는다. moderate로 되돌릴 수 있는지 주기적으로 확인한다.
+      - name: 보안 점검
+        run: npm audit --audit-level=high
+
+      - name: 단위 테스트
+        run: npm test

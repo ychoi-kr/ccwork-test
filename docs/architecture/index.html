@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notes App Architecture</title>
+    <style>
+      :root {
+        --bg: #f4f4f5;
+        --card: #fff;
+        --fg: #18202f;
+        --muted: #6b7280;
+        --border: #e4e4e7;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #111317;
+          --card: #1b1e24;
+          --fg: #e8eaee;
+          --muted: #9aa1ad;
+          --border: #2c313a;
+        }
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: 'Pretendard Variable', system-ui, sans-serif;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 16px 64px;
+      }
+      h1 {
+        margin: 0 0 4px;
+      }
+      h2 {
+        margin: 0 0 4px;
+        font-size: 1.15rem;
+      }
+      .lead {
+        color: var(--muted);
+        margin: 0 0 28px;
+      }
+      section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+      }
+      section p {
+        color: var(--muted);
+        margin: 0 0 16px;
+        font-size: 0.92rem;
+      }
+      .mermaid {
+        overflow-x: auto;
+        text-align: center;
+      }
+      code {
+        background: var(--border);
+        padding: 1px 5px;
+        border-radius: 4px;
+        font-size: 0.85em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>📝 Notes App 아키텍처</h1>
+      <p class="lead">
+        <code>src/</code> 분석 결과 · React 19 + TypeScript + Vite / Context API / json-server
+      </p>
+
+      <section>
+        <h2>1. 모듈 의존성 (import 관계)</h2>
+        <p>
+          화살표는 "A가 B를 import한다"는 뜻입니다. 컴포넌트는 <code>api/</code>를 직접 import하지
+          않고, <code>NotesContext</code>만 API 계층에 접근합니다.
+        </p>
+        <pre class="mermaid">
+flowchart LR
+  subgraph entry["진입점"]
+    main["main.tsx"]
+    css["index.css"]
+  end
+  subgraph ui["components"]
+    App["App.tsx"]
+    Layout["Layout"]
+    NoteList["NoteList"]
+    NoteItem["NoteItem"]
+    NoteEditor["NoteEditor"]
+  end
+  subgraph state["context"]
+    Ctx["NotesContext<br/>NotesProvider / useNotes"]
+  end
+  subgraph data["api / types"]
+    api["api/notes.ts"]
+    type["types/note.ts<br/>Note"]
+  end
+  server[("json-server<br/>db.json :3001")]
+
+  main --> App
+  main --> css
+  App --> Ctx
+  App --> Layout
+  App --> NoteList
+  App --> NoteEditor
+  NoteList --> Ctx
+  NoteList --> NoteItem
+  NoteEditor --> Ctx
+  NoteItem --> type
+  Ctx --> api
+  Ctx --> type
+  api --> type
+  api -. "fetch (HTTP)" .-> server
+
+  classDef comp fill:#dbeafe,stroke:#3b82f6,color:#111;
+  classDef ctx fill:#fef3c7,stroke:#f59e0b,color:#111;
+  classDef dat fill:#dcfce7,stroke:#22c55e,color:#111;
+  classDef ext fill:#f3e8ff,stroke:#a855f7,color:#111;
+  class App,Layout,NoteList,NoteItem,NoteEditor comp;
+  class Ctx ctx;
+  class api,type dat;
+  class server ext;
+        </pre>
+      </section>
+
+      <section>
+        <h2>2. 컴포넌트 트리와 props 흐름</h2>
+        <p>
+          렌더링 계층입니다. <code>Layout</code>은 <code>sidebar</code>/<code>main</code> 슬롯
+          props로 영역을 받고, 아래로는 데이터와 콜백이, 위로는 콜백 호출로 이벤트가 전달됩니다.
+        </p>
+        <pre class="mermaid">
+flowchart TD
+  App["App<br/>selectedNoteId, isCreating"]
+  Provider["NotesProvider<br/>notes, loading, error"]
+  Layout["Layout"]
+  List["NoteList"]
+  Item["NoteItem × N"]
+  Editor["NoteEditor<br/>title, content, saving"]
+
+  App --> Provider
+  Provider --> Layout
+  Layout -- "sidebar 슬롯" --> List
+  Layout -- "main 슬롯" --> Editor
+  List --> Item
+
+  App -. "onNewNote" .-> Layout
+  App -. "selectedNoteId, onSelect" .-> List
+  App -. "selectedNoteId, isCreating, onDone" .-> Editor
+  List -. "note, isSelected, onSelect, onDelete" .-> Item
+
+  classDef comp fill:#dbeafe,stroke:#3b82f6,color:#111;
+  classDef ctx fill:#fef3c7,stroke:#f59e0b,color:#111;
+  class App,Layout,List,Item,Editor comp;
+  class Provider ctx;
+        </pre>
+      </section>
+
+      <section>
+        <h2>3. 상태 위치와 흐름</h2>
+        <p>
+          상태는 세 곳에 나뉩니다. 서버 데이터는 Context, 선택·생성 모드는 <code>App</code>, 폼
+          입력은 <code>NoteEditor</code>가 소유합니다.
+        </p>
+        <pre class="mermaid">
+flowchart LR
+  subgraph AppState["App 로컬 상태"]
+    sel["selectedNoteId"]
+    cre["isCreating"]
+  end
+  subgraph CtxState["NotesContext 상태"]
+    notes["notes"]
+    loading["loading"]
+    error["error"]
+  end
+  subgraph EdState["NoteEditor 로컬 상태"]
+    title["title"]
+    content["content"]
+    saving["saving"]
+  end
+
+  sel -- "props" --> NoteList
+  sel -- "props" --> NoteEditor
+  cre -- "props" --> NoteEditor
+  NoteList -- "onSelect: sel 설정, cre=false" --> sel
+  Layout -- "onNewNote: sel=null, cre=true" --> sel
+  Layout -- "onNewNote" --> cre
+  NoteEditor -- "onDone (저장/취소): cre=false" --> cre
+
+  notes -- "useNotes" --> NoteList
+  notes -- "useNotes: 선택 노트 조회" --> NoteEditor
+  loading --> NoteList
+  error --> NoteList
+  NoteEditor -- "createNote / updateNote" --> notes
+  NoteList -- "deleteNote" --> notes
+
+  notes -. "useEffect: selectedNoteId·isCreating 변경 시에만 폼 채움" .-> title
+  notes -. "useEffect: selectedNoteId·isCreating 변경 시에만 폼 채움" .-> content
+        </pre>
+      </section>
+
+      <section>
+        <h2>4. 저장 시퀀스 (생성/수정)</h2>
+        <p>
+          서버 응답을 받은 뒤에 로컬 상태를 갱신합니다(낙관적 업데이트 아님). 실패하면 예외가
+          호출한 컴포넌트까지 전파되고 <code>console.error</code>로만 기록됩니다.
+        </p>
+        <pre class="mermaid">
+sequenceDiagram
+  actor User
+  participant Editor as NoteEditor
+  participant Ctx as NotesContext
+  participant API as api/notes.ts
+  participant DB as json-server
+  participant App
+  participant List as NoteList
+
+  User->>Editor: 저장 클릭
+  Editor->>Editor: handleSave, setSaving(true)
+  Editor->>Ctx: createNote(title, content) / updateNote(id, updates)
+  Ctx->>API: createNote / updateNote
+  API->>DB: POST / PATCH /notes
+  DB-->>API: 저장된 Note
+  API-->>Ctx: Note
+  Ctx->>Ctx: setNotes(prev → 추가/교체)
+  Ctx-->>List: notes 변경으로 리렌더
+  Ctx-->>Editor: 완료
+  Editor->>App: onDone()
+  App->>App: setIsCreating(false)
+  Note over Editor,Ctx: 실패 시 throw → Editor가 console.error
+  Note over Editor,App: 신규 생성 후엔 selectedNoteId가 null이라 빈 상태 화면으로 돌아감
+        </pre>
+      </section>
+
+      <section>
+        <h2>5. 삭제 시퀀스</h2>
+        <pre class="mermaid">
+sequenceDiagram
+  actor User
+  participant Item as NoteItem
+  participant List as NoteList
+  participant Ctx as NotesContext
+  participant API as api/notes.ts
+  participant DB as json-server
+
+  User->>Item: 삭제 클릭 (stopPropagation)
+  Item->>List: onDelete(id) → handleDelete
+  List->>Ctx: deleteNote(id)
+  Ctx->>API: deleteNote(id)
+  API->>DB: DELETE /notes/:id
+  DB-->>API: 200
+  Ctx->>Ctx: setNotes(prev → filter)
+  Ctx-->>List: 리렌더
+  Note over List,Ctx: 실패 시 List가 console.error
+        </pre>
+      </section>
+
+      <section>
+        <h2>6. 초기 로딩 시퀀스</h2>
+        <p>
+          <code>NotesProvider</code>가 마운트될 때 한 번 목록을 불러옵니다. 조회 실패는 throw되지
+          않고 <code>error</code> 상태로 흡수되어 <code>NoteList</code>에 표시됩니다.
+        </p>
+        <pre class="mermaid">
+sequenceDiagram
+  participant Ctx as NotesProvider
+  participant API as api/notes.ts
+  participant DB as json-server
+  participant List as NoteList
+
+  Ctx->>Ctx: 마운트, useEffect (loading=true)
+  Ctx->>API: fetchNotes()
+  API->>DB: GET /notes
+  alt 성공
+    DB-->>API: Note[]
+    API-->>Ctx: Note[]
+    Ctx->>Ctx: setNotes
+  else 실패
+    API-->>Ctx: throw Error
+    Ctx->>Ctx: setError(e.message)
+  end
+  Ctx->>Ctx: finally setLoading(false)
+  Ctx-->>List: 로딩 → 오류 / 빈 상태 / 목록 렌더
+        </pre>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.0/dist/mermaid.min.js"></script>
+    <script>
+      const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: dark ? 'dark' : 'default',
+        securityLevel: 'loose',
+        flowchart: { htmlLabels: true, curve: 'basis' },
+      });
+    </script>
+  </body>
+</html>
