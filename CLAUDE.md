@@ -97,6 +97,23 @@ components (UI)  →  context/NotesContext (전역 상태)  →  api/notes (fetc
 8. **react-refresh 규칙**: `NotesContext.tsx`가 컴포넌트(`NotesProvider`)와 훅(`useNotes`)을 함께 export하므로 `react-refresh/only-export-components` 경고 대상이다.
 9. **파일명 단/복수**: `api/notes.ts`는 복수, `types/note.ts`는 단수다.
 
+## TDD 이슈 사이클
+
+새 이슈 작업 시 다음 순서를 따른다:
+
+1. `/test-scenarios N` - 시그니처 + 시나리오 (skill)
+2. `/tdd-red N` - 실패 테스트 작성 (skill)
+3. `/tdd-green N` - 최소 구현, 테스트 전체 통과 (skill)
+4. `@ac-verifier N` - AC 충족 독립 검증, 테스트 통과 ≠ AC 충족 (agent)
+5. `/tdd-refactor N` - 구조 개선, 깨지면 즉시 롤백 (skill)
+6. `/security-review N` - 타입·보안 점검 (skill)
+7. commit → PR `--base feature/<spec>` → squash merge → 이슈 클로즈
+
+- 각 단계는 인간 승인 게이트가 있다. **자동으로 다음 단계로 넘어가지 말 것.**
+- 이슈 의존성이 있으면 선행 이슈가 머지된 feature 브랜치에서 분기한다.
+- Claude는 이 사이클의 흐름을 관리한다. 한 단계가 끝나면 결과를 요약하고 **다음 단계를 제안**하되, 사용자가 승인하기 전에는 실행하지 않는다. 사용자가 단계를 건너뛰거나 순서를 바꾸면 그 이유를 한 줄로 확인하고 따른다.
+- 새 이슈 작업을 시작할 때는 현재 단계가 어디인지(시나리오 문서 `docs/features/<feature>/issue-N.md`의 `상태:`, 브랜치, 테스트 현황)를 먼저 확인하고, 이어서 할 단계를 제안한다.
+
 ## 커밋 규칙
 
 husky가 커밋 시 hook을 자동 실행한다. 위반하면 커밋이 중단되므로 아래 규칙을 미리 지킨다.
