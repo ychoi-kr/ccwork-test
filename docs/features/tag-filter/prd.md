@@ -54,7 +54,7 @@
 
 React 내장 훅만으로 커스텀훅을 만들고, 사이드바 컨테이너 컴포넌트에서 한 번 호출해 두 표현 컴포넌트에 props로 내려보낸다.
 
-- **`useTagFilter(notes)`** (`src/hooks/useTagFilter.ts`)
+- **`useTagFilter(notes)`** (`src/tags/useTagFilter.ts`)
   - 입력: `Note[]`. 반환: `{ tags, selectedTag, filteredNotes, toggleTag }`.
   - 내부 상태는 사용자가 마지막으로 누른 태그 문자열 하나(`useState`)뿐이다.
   - `tags`: 모든 노트의 태그를 대소문자 무시로 합쳐 중복 제거하고, 리스트 순서상 처음 나온 표기를 유지해 `localeCompare('ko')`로 정렬한 배열. `tags`가 없는 노트는 `[]`로 간주한다.
@@ -63,10 +63,10 @@ React 내장 훅만으로 커스텀훅을 만들고, 사이드바 컨테이너 �
   - `toggleTag(tag)`: 현재 `selectedTag`와 같으면 해제, 다르면 교체한다.
   - 서버, Context, 컴포넌트를 모르는 순수 상태 훅이다.
   - 대소문자 무시 태그 비교 함수 `isSameTag(a, b)`를 같은 파일에서 export하고, 훅 내부 계산과 `NoteItem`의 하이라이트 판정이 이 함수를 함께 쓴다(비교 규칙이 두 곳에서 갈라지지 않게 한다).
-- **`TagFilter` 컴포넌트** (`src/components/TagFilter.tsx`)
+- **`TagFilter` 컴포넌트** (`src/tags/TagFilter.tsx`)
   - `tags`, `selectedTag`, `onToggle`을 props로 받는 표현 컴포넌트. `tags`가 비면 `null`을 반환(early return)한다.
   - 칩은 `<button>`이고 `aria-pressed`로 선택 상태를 노출한다. 선택됨은 `surface_container_highest` 배경, 스타일은 디자인 시스템 토큰만 쓴다(`design-system` 스킬로 진행).
-- **`Sidebar` 컴포넌트** (`src/components/Sidebar.tsx`)
+- **`Sidebar` 컴포넌트** (`src/layout/Sidebar.tsx`)
   - `useNotes()`에서 `notes`, `loading`, `error`를 읽고 `useTagFilter(notes)`를 호출한다.
   - 로딩·에러가 아닐 때만 `TagFilter`를 렌더하고, `NoteList`에는 `filteredNotes`를 `notes` props로, `selectedTag`를 `selectedTag` props로 내려보낸다.
   - `selectedNoteId`, `onSelect`는 `App`에서 받아 `NoteList`에 그대로 전달한다(통과만 한다).

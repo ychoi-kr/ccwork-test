@@ -1,13 +1,15 @@
 import { useNotes } from './NotesContext';
+import { Note } from '../types/note';
 import { NoteItem } from './NoteItem';
 
 interface NoteListProps {
+  notes: Note[];
   selectedNoteId: string | null;
   onSelect: (id: string) => void;
 }
 
-export function NoteList({ selectedNoteId, onSelect }: NoteListProps) {
-  const { notes, loading, error, deleteNote } = useNotes();
+export function NoteList({ notes, selectedNoteId, onSelect }: NoteListProps) {
+  const { loading, error, deleteNote } = useNotes();
 
   const handleDelete = async (id: string) => {
     try {

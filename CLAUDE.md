@@ -29,14 +29,17 @@ npx vitest run -t "테스트 이름"                      # 이름으로 단일 
 데이터 흐름은 한 방향으로 흐르는 세 계층이다.
 
 ```
-components (UI)  →  context/NotesContext (전역 상태)  →  api/notes (fetch)  →  json-server(db.json)
+components (UI)  →  notes/NotesContext (전역 상태)  →  notes/notes (fetch)  →  json-server(db.json)
 ```
 
-- **`src/api/notes.ts`**: `fetch` 래퍼(`fetchNotes`, `createNote`, `updateNote`, `deleteNote`). `API_URL`은 `http://localhost:3001`로 하드코딩되어 있다. `res.ok`가 아니면 `Error`를 throw한다. `createdAt`/`updatedAt` 타임스탬프는 **클라이언트에서** 생성한다(`new Date().toISOString()`). `id`는 json-server가 부여하는 문자열이다. 수정은 `PATCH`.
-- **`src/context/NotesContext.tsx`**: `NotesProvider`와 `useNotes()` 훅. `notes`, `loading`, `error` 상태와 `createNote` / `updateNote` / `deleteNote`를 제공한다(API 함수와 같은 이름). 상태 갱신은 **API 호출 성공 후** 서버 응답으로 로컬 상태를 반영하는 방식이며(낙관적 업데이트 아님), 실패 시 throw를 그대로 호출자에게 전파하며, 호출하는 컴포넌트가 `try/catch`로 `console.error`만 남긴다(`alert` 등 사용자 알림은 쓰지 않는다). `useNotes`는 Provider 밖에서 쓰면 에러를 던진다.
+- **`src/notes/notes.ts`**: `fetch` 래퍼(`fetchNotes`, `createNote`, `updateNote`, `deleteNote`). `API_URL`은 `http://localhost:3001`로 하드코딩되어 있다. `res.ok`가 아니면 `Error`를 throw한다. `createdAt`/`updatedAt` 타임스탬프는 **클라이언트에서** 생성한다(`new Date().toISOString()`). `id`는 json-server가 부여하는 문자열이다. 수정은 `PATCH`.
+- **`src/notes/NotesContext.tsx`**: `NotesProvider`와 `useNotes()` 훅. `notes`, `loading`, `error` 상태와 `createNote` / `updateNote` / `deleteNote`를 제공한다(API 함수와 같은 이름). 상태 갱신은 **API 호출 성공 후** 서버 응답으로 로컬 상태를 반영하는 방식이며(낙관적 업데이트 아님), 실패 시 throw를 그대로 호출자에게 전파하며, 호출하는 컴포넌트가 `try/catch`로 `console.error`만 남긴다(`alert` 등 사용자 알림은 쓰지 않는다). `useNotes`는 Provider 밖에서 쓰면 에러를 던진다.
 - **`src/App.tsx`**: UI 선택 상태(`selectedNoteId`, `isCreating`)만 보유한다. 이 두 값은 서로 배타적으로 유지된다(새 노트 → 선택 해제 + 생성 모드, 노트 선택 → 생성 모드 해제). 이 상태는 Context가 아니라 props로 내려보낸다.
-- **`src/components/`**: `Layout`(헤더 + 사이드바/메인 슬롯, `sidebar`/`main`을 ReactNode props로 받음), `NoteList`(로딩/에러/빈 상태 처리 후 목록 렌더), `NoteItem`(카드 하나, 삭제 버튼은 `stopPropagation`), `NoteEditor`(생성/편집 겸용 폼).
-- **`src/types/note.ts`**: `Note` 인터페이스. 새 필드를 추가할 때는 타입 → `api/notes.ts`의 `Omit`/`Partial` 시그니처 → Context → 컴포넌트 순으로 따라가면 된다.
+- **`src/layout/`**: `Layout`(헤더 + 사이드바/메인 슬롯, `sidebar`/`main`을 ReactNode props로 받음), `Sidebar`(`TagFilter` + `NoteList` 조합, `useTagFilter`로 필터 상태 보유).
+- **`src/notes/`**: 노트 도메인. `NoteList`(로딩/에러/빈 상태 처리 후 `notes` props 목록 렌더), `NoteItem`(카드 하나, 삭제 버튼은 `stopPropagation`), `NoteEditor`(생성/편집 겸용 폼), 위의 `NotesContext`·`notes.ts`.
+- **`src/tags/`**: 태그 도메인. `TagInput`(편집기의 태그 입력·칩), `TagFilter`(사이드바의 태그 필터 칩), 훅 `useTags`·`useTagInput`·`useTagFilter`.
+- **디렉터리 규칙**: 종류(components/hooks/api)가 아니라 **도메인**별로 나눈다. 도메인 안에서는 평평하게 두고 컴포넌트·훅·테스트를 함께 둔다. 공용 타입은 `src/types/`에 두어 `notes`와 `tags`가 서로를 import하는 순환을 피한다. 앱 껍데기(`layout/`)는 여러 도메인을 조합할 수 있다.
+- **`src/types/note.ts`**: `Note` 인터페이스. 새 필드를 추가할 때는 타입 → `notes/notes.ts`의 `Omit`/`Partial` 시그니처 → Context → 컴포넌트 순으로 따라가면 된다.
 
 ## 구현 패턴 / 컨벤션
 
@@ -59,11 +62,11 @@ components (UI)  →  context/NotesContext (전역 상태)  →  api/notes (fetc
 
 ### API 호출
 
-- `src/api/notes.ts`에 리소스별로 async 함수를 모은다. 모두 `fetch` + `if (!res.ok) throw new Error('Failed to ...')` + `res.json()` 형태다.
+- `src/notes/notes.ts`에 리소스별로 async 함수를 모은다. 모두 `fetch` + `if (!res.ok) throw new Error('Failed to ...')` + `res.json()` 형태다.
 - 쓰기 요청은 `Content-Type: application/json` 헤더와 `JSON.stringify` 본문을 쓴다. 생성은 `POST`, 수정은 `PATCH`(부분 수정), 삭제는 `DELETE`(반환값 없음, `Promise<void>`).
 - `createdAt`/`updatedAt`은 API 함수 안에서 채운다. 호출자는 `title`/`content`만 넘긴다.
 - 에러 메시지는 영어 고정 문자열이고, UI에서 보여줄 한국어 문구는 컴포넌트(`NoteList`의 에러 표시)에서 붙인다. 변경(생성/수정/삭제) 실패는 호출한 컴포넌트에서 `console.error`로만 기록한다.
-- API 모듈은 `import * as api from '../api/notes'` 형태로 `NotesContext.tsx`에서만 import한다.
+- API 모듈은 `import * as api from './notes'` 형태로 `NotesContext.tsx`에서만 import한다.
 
 ### 네이밍
 
@@ -95,7 +98,7 @@ components (UI)  →  context/NotesContext (전역 상태)  →  api/notes (fetc
 6. **방어 코드와 검증이 어긋남**: `NoteItem`은 `note.title || '(제목 없음)'`을 처리하지만 `NoteEditor`는 빈 제목 저장을 막는다. 제목이 빈 노트는 생길 수 없다.
 7. **`NoteEditor`의 `useEffect`**: 선택 노트가 서버에서 갱신돼도 폼은 다시 동기화되지 않는다(의존성이 `selectedNoteId`, `isCreating`뿐). lint 경고는 `eslint-disable`로 억제했다.
 8. **react-refresh 규칙**: `NotesContext.tsx`가 컴포넌트(`NotesProvider`)와 훅(`useNotes`)을 함께 export하므로 `react-refresh/only-export-components` 경고 대상이다.
-9. **파일명 단/복수**: `api/notes.ts`는 복수, `types/note.ts`는 단수다.
+9. **파일명 단/복수**: `notes/notes.ts`는 복수, `types/note.ts`는 단수다.
 
 ## TDD 이슈 사이클
 

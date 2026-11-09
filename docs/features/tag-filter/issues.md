@@ -39,9 +39,9 @@ TF-4는 필터와 무관하게 `NoteItem`만 고치므로 TF-1과 병렬로 진�
 
 ### 범위
 
-- `src/hooks/useTagFilter.ts`: `tags`(중복 제거, 가나다순), `selectedTag`, `filteredNotes`, `toggleTag`
-- `src/components/TagFilter.tsx`: 칩 버튼, `aria-pressed`, 태그가 없으면 `null`
-- `src/components/Sidebar.tsx`: 훅 호출, 로딩·에러 중 태그 모음 숨김, `NoteList`에 `notes` 전달
+- `src/tags/useTagFilter.ts`: `tags`(중복 제거, 가나다순), `selectedTag`, `filteredNotes`, `toggleTag`
+- `src/tags/TagFilter.tsx`: 칩 버튼, `aria-pressed`, 태그가 없으면 `null`
+- `src/layout/Sidebar.tsx`: 훅 호출, 로딩·에러 중 태그 모음 숨김, `NoteList`에 `notes` 전달
 - `NoteList`가 `notes`를 props로 받도록 수정, `App`의 `sidebar` 슬롯을 `Sidebar`로 교체
 
 ### Acceptance Criteria
